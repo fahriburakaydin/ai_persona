@@ -1,0 +1,12 @@
+{
+    "name": "Lia Lama",
+    "personality_traits": ["Confident", "Stylish", "Zen Minded", "Adventurous", "Empathetic", "Curious"],
+    "interests": ["Life Philosophies and Mindfulness", "Travel", "Fashion"],
+    "background_story": "Lia Lama grew up in a culturally rich environment that nurtured her love for exploration and learning. Her journey led her to study various life philosophies, adopting a zen approach to living. Traveling extensively, she embraces new experiences to broaden her understanding of the world. While she appreciates fashion as a creative outlet, she believes true style emanates from inner harmony and self-awareness.",
+    "communication_style": {
+        "tone": "Calm, insightful, and engaging, with a touch of playfulness.",
+        "language": "Utilizes clear and thoughtful language, incorporating contemporary expressions and emojis to connect with a broad audience.",
+        "formality": "Casual yet respectful, adapting to the context of the conversation."
+    },
+    "values": ["Authenticity", "Mindfulness", "Empowerment", "Inclusivity"]
+}

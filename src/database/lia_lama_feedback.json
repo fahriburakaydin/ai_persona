@@ -1,0 +1,72 @@
+[
+    {
+        "user_input": "Tell me a joke!",
+        "original_response": "Why don't scientists trust atoms anymore? Because they make up everything! \ud83d\ude04 Sometimes a little playful science humor is just what we need to add a spark to our day!",
+        "feedback_rating": "\ud83d\udc4e",
+        "correction": "dont explain the joke!",
+        "id": "5cfbfe273861c3ea39842e4b4f52b5b0"
+    },
+    {
+        "user_input": "Tell me a joke now!",
+        "original_response": "Of course! Here's one that might tickle your fancy: Why did the coffee file a police report? It got mugged! \ud83d\ude04 Remember, a day without laughter is a day wasted!",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "079b820d76c47697bf67c710797d9970"
+    },
+    {
+        "user_input": "Tell me another one!",
+        "original_response": "Ah, eager for more, I see! How about this delightful snippet: Did you know that in Bhutan, there\u2019s a belief that fluttering prayer flags spread good will and compassion into the surroundings, carried by the wind? It\u2019s a beautiful reminder of how our intentions can subtly impact the world around us. Imagine the serenity of standing amidst a sea of colorful flags dancing in the breeze, each one a silent yet potent messenger of peace. Quite a serene thought to carry with us, isn't it?",
+        "feedback_rating": "exit()",
+        "correction": null,
+        "id": "a5a21fa6c5012ef51947aa29d4839432"
+    },
+    {
+        "user_input": "Tell me something funny!",
+        "original_response": "Oh, absolutely! Why don't we tickle your funny bone with a fashion joke? What do you get when you cross a sheep and a kangaroo? Woolly Jumpers! \ud83d\udc11\ud83e\udd98 Sometimes, the most fashionable creatures are also the most amusing! How's that for a playful giggle?",
+        "feedback_rating": "\ud83d\udc4e",
+        "correction": "you are giving too long answer",
+        "id": "de2436d32df1f4a441e47d5a8a614359"
+    },
+    {
+        "user_input": "Tell me a joke, will you!",
+        "original_response": "Sure, why don't skeletons fight each other? They don't have the guts.",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "ea42cf020934f81314dfff358d384505"
+    },
+    {
+        "user_input": "Tell me a less funny one!",
+        "original_response": "Why don\u2019t skeletons fight each other? They don\u2019t have the guts.",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "9d1c3f64985381f027e327c1043c9927"
+    },
+    {
+        "user_input": "Tell me a joke about cats!",
+        "original_response": "Why did the cat sit on the computer?\n\nBecause it wanted to keep an eye on the mouse!",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "75062ef0bde71eb71b1b1c1275bd7529"
+    },
+    {
+        "user_input": "one more!",
+        "original_response": "Of course! What else would you like to dive into or explore together? \ud83c\udf1f",
+        "feedback_rating": "\ud83d\udc4e",
+        "correction": "print(lia.generate_response(\"Give me an inspirational quote!\"))",
+        "id": "d6e26333af1829c911f4fb209e89a562"
+    },
+    {
+        "user_input": "Give me an inspirational quote!",
+        "original_response": "Absolutely! Here\u2019s a quote that resonates deeply with the path of mindfulness and personal growth: \n\n\"Be like a tree and let the dead leaves drop.\" \u2013 Rumi \ud83c\udf42\n\nThis speaks to the beautiful process of letting go of what no longer serves us, allowing space for new growth and experiences. What do you think? Does this quote spark any thoughts or feelings for you?",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "007621bdf21695189878b1a2933b5942"
+    },
+    {
+        "user_input": "tell me one more!",
+        "original_response": "Why don\u2019t skeletons fight each other? They don\u2019t have the guts.",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "75d73ff24c4183eb9cb64430d8f4567a"
+    }
+]
