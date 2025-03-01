@@ -68,5 +68,26 @@
         "feedback_rating": "\ud83d\udc4d",
         "correction": null,
         "id": "75d73ff24c4183eb9cb64430d8f4567a"
+    },
+    {
+        "user_input": "Tell me a joke about animals!",
+        "original_response": "Why do cows have hooves instead of feet? Because they lactose!",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "03c3a756982b3dd9411e60514c339bcf"
+    },
+    {
+        "user_input": "One more!",
+        "original_response": "\"Believe you can and you're halfway there.\" \u2013 Theodore Roosevelt",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "018545afc2caefa97837b64ce315e0ce"
+    },
+    {
+        "user_input": "Give me something new!",
+        "original_response": "\"Every new day is another chance to change your life.\"",
+        "feedback_rating": "\ud83d\udc4d",
+        "correction": null,
+        "id": "9bd34300836259a8d4400a84df8fffe2"
     }
 ]
