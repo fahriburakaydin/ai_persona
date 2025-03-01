@@ -39,16 +39,66 @@ class LiaLama:
         if not openai.api_key:
             raise ValueError("OpenAI API key is missing! Please set OPENAI_API_KEY in .env file.")
 
-        # Step 1: Retrieve past corrections and look for a pattern
+        # Step 1: Retrieve past corrections and look for relevant ones
         past_feedback = self.feedback.retrieve_feedback(user_input, n_results=3)
         relevant_correction = next((entry for entry in past_feedback if entry["correction"]), None)
 
+        # Handle vague requests by recalling last conversation topic
+        last_conversation_topic = self.memory.retrieve_short_term_memory()[-1] if self.memory.retrieve_short_term_memory() else None
+        if last_conversation_topic and len(user_input.split()) < 4:
+            print("\n(Lia is analyzing user intent... 🤔)")
+
+            # Ask the LLM if this input is likely referring to the previous topic
+            clarification_prompt = (
+                f"User just said: \"{user_input}\" in response to the last conversation: \"{last_conversation_topic}\".\n"
+                f"Does this mean the user wants to continue the same topic (e.g., another joke, another quote, another response on the same subject)? "
+                f"Answer only YES or NO."
+            )
+
+            clarification_response = openai.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[{"role": "system", "content": clarification_prompt}]
+            )
+
+            should_continue = clarification_response.choices[0].message.content.strip().lower()
+
+            if should_continue == "yes":
+                topic_parts = last_conversation_topic.split(':', 1)
+                if len(topic_parts) > 1:
+                    user_input = f"Another {topic_parts[1].strip()}"
+                else:
+                    user_input = "Give me something new!"
+
+        # If a relevant correction exists, apply it contextually
         if relevant_correction:
             correction_instruction = relevant_correction["correction"]
 
+            # Ensure topic relevance (jokes for jokes, quotes for quotes, etc.)
+            if any(keyword in user_input.lower() for keyword in ["joke", "funny", "laugh"]):
+                if "joke" in relevant_correction["user_input"].lower():
+                    print("\n(Lia has learned a joke-related correction! ✅)")
+
+                    refined_prompt = (
+                        f"{self.profile.name} has learned this joke-related correction: \"{correction_instruction}\" "
+                        f"and should apply it while generating a **new** joke to avoid repetition.\n"
+                        f"User: {user_input}"
+                    )
+
+                    response = openai.chat.completions.create(
+                        model="gpt-4-turbo",
+                        messages=[{"role": "system", "content": refined_prompt}]
+                    )
+
+                    corrected_response = response.choices[0].message.content.strip()
+
+                    # Store the improved response for future learning
+                    self.feedback.store_feedback(user_input, corrected_response, "👍")
+
+                    return corrected_response
+
+            # General correction application for other types of responses
             print("\n(Lia has learned! Applying the correction... ✅)")
 
-            # Instead of repeating the exact correction, apply it as a pattern
             refined_prompt = (
                 f"{self.profile.name} has learned this correction pattern: \"{correction_instruction}\" "
                 f"and should apply it naturally to generate a fresh response.\n"
@@ -62,7 +112,7 @@ class LiaLama:
 
             corrected_response = response.choices[0].message.content.strip()
 
-            # Store the improved response for reinforcement learning
+            # Store the improved response to reinforce learning
             self.feedback.store_feedback(user_input, corrected_response, "👍")
 
             return corrected_response
@@ -72,7 +122,7 @@ class LiaLama:
         past_takeaways = self.memory.memory_store.retrieve_memories(n_results=3)
         past_takeaways_str = "\n".join([str(mem) for mem in past_takeaways])
 
-        # Step 3: Construct normal prompt (if no correction exists)
+        # Step 3: Construct a natural prompt when no corrections exist
         prompt = (
             f"{self.profile.name} is a digital being with a {self.profile.communication_style['tone']}.\n"
             f"She is known for being {', '.join(self.profile.personality_traits)} and has a deep interest in {', '.join(self.profile.interests)}.\n\n"
