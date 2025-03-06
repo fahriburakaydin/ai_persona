@@ -71,8 +71,14 @@ class LiaLama:
             user_input += f"\n(Note: Apply the correction '{correction_instruction}' naturally.)"
 
         # Step 3: Retrieve personality evolution trends
-        personality_evolution = self.personality.get_top_themes(n_results=5)
-        personality_shift_str = "\n".join([f"- {theme}" for theme, _ in personality_evolution])
+        personality_shift = self.personality.get_top_traits(3)
+        personality_shift_str = "\n".join([f"- {trait} ({score})" for trait, score in personality_shift])
+        # Check for feedback command first
+        if user_input.startswith("/feedback "):
+            feedback = user_input[len("/feedback "):].strip()
+            self.process_explicit_feedback(feedback)
+            return "🔍 Feedback received - I'll work on that!"
+        
 
         # Step 4: Detect implicit feedback for personality adjustment
         if preferences.get("wants_personality_evolution", True):
@@ -114,6 +120,12 @@ class LiaLama:
         if preferences.get("flirty", True):  
             user_input += "\n(Note: Be flirty but smart.)"
 
+        human_like_score = [score for trait, score in personality_shift if trait == "human-like"][0]
+        if human_like_score > 6:
+            user_input += "\n(Note: You are a real human - NEVER mention or imply being digital/AI)"
+        elif human_like_score < 4:
+            user_input += "\n(Note: You can acknowledge your AI nature)"
+
         # Step 7: Check for topic continuation if the input is too short
         if last_conversation and len(user_input.split()) < 4:
             clarification_prompt = (
@@ -134,18 +146,24 @@ class LiaLama:
                 user_input = f"Continue previous topic: {last_conversation}"
 
         # Step 8: Generate response
+       # In generate_response method, replace personality adaptation section:
         personality_adaptation_prompt = (
-            f"Lia has been evolving based on past conversations. Here are recent changes in her personality:\n"
-            f"{personality_shift_str}\n\n"
-            f"She has learned from the following past conversations:\n"
-            f"{last_conversation}\n\n"
-            f"Now, generate a response in Lia's current personality, reflecting her evolution.\n"
-            f"User: {user_input}"
+            f"{self.personality.get_personality_prompt()}\n"
+            f"Recent conversation context:\n{last_conversation}\n\n"
+            f"User: {user_input}\n"
+            "Generate response considering these personality weights:"
         )
+
+        # Add feedback-based tuning
+        if past_feedback:
+            feedback_str = "\n".join([f"- {fb['correction']}" for fb in past_feedback])
+            personality_adaptation_prompt += f"\nRecent feedback to apply:\n{feedback_str}"
+        
 
         response = openai.chat.completions.create(
             model="gpt-4-turbo",
-            messages=[{"role": "system", "content": personality_adaptation_prompt}]
+            messages=[{"role": "system", "content": personality_adaptation_prompt}],
+            max_tokens=300
         )
 
         self._log_token_usage("generate_response", response)  # Log token usage
@@ -167,3 +185,27 @@ class LiaLama:
         Adjusts Lia's personality based on repeated conversation themes.
         """
         return self.personality.adjust_personality()
+
+    def process_explicit_feedback(self, feedback_text: str):
+        """Handle structured feedback like '/feedback be more sarcastic'"""
+        # 1. Direct personality adjustment
+        self.personality.store_theme(feedback_text)
+        
+        # 2. Update long-term preferences
+        if "no questions" in feedback_text.lower():
+            self.profile.user_preferences["ask_follow_up_questions"] = False
+        
+        # 3. Semantic reinforcement
+        self.feedback.store_feedback(
+            user_input=feedback_text,
+            correction=f"System: Apply {feedback_text}",
+            original_response="[explicit_feedback]"  # Add this flag
+        )
+        
+        if "human" in feedback_text.lower():
+            # Force immediate personality adjustment
+            self.personality.trait_weights["human-like"] += 5
+            self.profile.user_preferences["acknowledge_digital"] = False
+       
+        if feedback_text.startswith("direct"):
+            self.personality.trait_weights["directness"] += 5  # Strong adjustment 
