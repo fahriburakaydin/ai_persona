@@ -2,3 +2,4 @@ openai
 chromadb 
 langchain
 sentence-transformers
+instagrapi
