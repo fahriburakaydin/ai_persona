@@ -13,14 +13,13 @@ class FeedbackManager:
         self.character_name = character_name
         self.feedback_store = FeedbackStore(character_name)
 
-    def store_feedback(self, user_input: str, original_response: str, feedback_rating: str, correction: str = None):
+    def store_feedback(self, user_input: str, original_response: str, correction: str = None):
         """
         Stores user feedback and corrections.
         """
         feedback_entry = {
             "user_input": user_input,
             "original_response": original_response,
-            "feedback_rating": feedback_rating,
             "correction": correction
         }
 
@@ -28,7 +27,7 @@ class FeedbackManager:
 
     def retrieve_feedback(self, user_input: str, n_results: int = 1):
         """
-        Retrieves past corrections for a similar user input.
+        Retrieves past corrections for a similar user input using semantic similarity.
         """
         return self.feedback_store.retrieve_feedback(user_input, n_results)
 
