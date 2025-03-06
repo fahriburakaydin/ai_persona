@@ -13,9 +13,9 @@ class FeedbackManager:
         self.character_name = character_name
         self.feedback_store = FeedbackStore(character_name)
 
-    def store_feedback(self, user_input: str, original_response: str, correction: str = None):
+    def store_feedback(self, user_input: str, correction: str = None, original_response: str = "[system]"):
         """
-        Stores user feedback and corrections.
+        Stores both implicit and explicit feedback.
         """
         feedback_entry = {
             "user_input": user_input,

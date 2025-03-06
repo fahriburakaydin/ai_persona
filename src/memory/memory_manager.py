@@ -46,7 +46,7 @@ class MemoryManager:
         """
         Summarizes long conversations and transfers key points to long-term memory.
         """
-        if len(self.short_term_memory) < 5:
+        if len(self.short_term_memory) < 8:
             return  # Skip summarization if conversation is short
 
         conversation_text = "\n".join(self.short_term_memory)
@@ -74,5 +74,5 @@ class MemoryManager:
         )
         print(f"Summary Generation Token Usage: {response.usage}")  # Debugging
 
-        self._log_token_usage("summary_generation(memoryMngr)", response)  # Explicitly call logging method
+        self.token_tracker.log_usage("memory_summary", response.usage)
         return response.choices[0].message.content.strip()

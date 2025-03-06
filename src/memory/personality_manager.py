@@ -1,57 +1,56 @@
 import chromadb
-from collections import Counter
+from collections import defaultdict
+from chromadb.utils import embedding_functions
 
 class PersonalityManager:
-    def __init__(self, character_name):
-        """
-        Manages Lia's evolving personality based on conversation insights.
-        """
-        self.character_name = character_name
-        self.client = chromadb.PersistentClient(path=f"./memory_store/{character_name}")
-        sanitized_name = character_name.strip().replace(" ", "_")  # Remove spaces
-        self.collection = self.client.get_or_create_collection(name=f"{sanitized_name}_personality")
+    def __init__(self, character_name: str):
+        self.character_name = character_name.lower().replace(' ', '_')
+        self.client = chromadb.PersistentClient(path="./memory_store")
+        self.embedder = embedding_functions.SentenceTransformerEmbeddingFunction("all-MiniLM-L6-v2")
+        
+        self.collection = self.client.get_or_create_collection(
+            name=f"{self.character_name}_personality",
+            embedding_function=self.embedder
+        )
+        
+        # Initialize trait weights
+        self.trait_weights = defaultdict(int)
+        self.base_traits = {
+            "thoughtful": 5, 
+            "playful": 5, 
+            "sarcastic": 5,
+            "inspiring": 5,
+            "adventurous": 5,
+            "human-like": 8
+        }
 
-
-    def store_theme(self, theme):
-        """
-        Stores a conversation theme as a memory entry.
-        """
-        memory_id = f"theme_{len(self.collection.get()['ids']) + 1}"
+    def store_theme(self, theme: str):
+        """Store theme and update trait weights"""
         self.collection.add(
             documents=[theme],
-            metadatas=[{"type": "theme"}],
-            ids=[memory_id]
+            ids=[f"theme_{len(self.collection.get()['ids']) + 1}"]
         )
+        
+        # Update weights based on theme content
+        theme_lower = theme.lower()
+        if "philosophy" in theme_lower:
+            self.trait_weights["thoughtful"] += 2
+        elif "humor" in theme_lower:
+            self.trait_weights["playful"] += 2
+        elif "travel" in theme_lower:
+            self.trait_weights["adventurous"] += 2
+        elif "motivation" in theme_lower:
+            self.trait_weights["inspiring"] += 2
+        elif "human" in theme_lower or "real person" in theme_lower:
+            self.trait_weights["human-like"] += 3
 
-    def get_top_themes(self, n_results=3):
-        """
-        Retrieves the most common conversation themes to adjust personality.
-        """
-        results = self.collection.get()
-        themes = [metadata["type"] for metadata in results["metadatas"] if "type" in metadata]
-        theme_counts = Counter(themes)
-        return theme_counts.most_common(n_results)
+    def get_top_traits(self, n_results: int = 3) -> list:
+        """Get current dominant traits"""
+        weighted = {k: v + self.trait_weights.get(k, 0) 
+                   for k, v in self.base_traits.items()}
+        return sorted(weighted.items(), key=lambda x: x[1], reverse=True)[:n_results]
 
-    def adjust_personality(self):
-        """
-        Adjusts Lia's personality based on dominant themes.
-        """
-        top_themes = self.get_top_themes()
-
-        if not top_themes:
-            return "No major personality shifts detected yet."
-
-        print("\n🔄 Adjusting Lia's personality based on conversation trends...")
-        personality_shift = []
-
-        for theme, count in top_themes:
-            if theme == "philosophy":
-                personality_shift.append("Lia becomes more thoughtful and deep-thinking.")
-            elif theme == "humor":
-                personality_shift.append("Lia adopts a more playful and witty tone.")
-            elif theme == "motivation":
-                personality_shift.append("Lia becomes more inspiring and uplifting.")
-            elif theme == "travel":
-                personality_shift.append("Lia speaks more about adventure and cultural experiences.")
-
-        return "\n".join(personality_shift) if personality_shift else "No major changes needed."
+    def get_personality_prompt(self) -> str:
+        """Generate dynamic personality prompt"""
+        top_traits = self.get_top_traits()
+        return f"Lia's current personality weights: {', '.join([f'{trait} ({score})' for trait, score in top_traits])}"
