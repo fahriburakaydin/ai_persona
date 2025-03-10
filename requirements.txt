@@ -3,3 +3,9 @@ chromadb
 langchain
 sentence-transformers
 instagrapi
+APScheduler
+diffusers 
+transformers 
+accelerate 
+torch 
+Pillow
