@@ -31,6 +31,7 @@ class LiaLama:
             profile_data = json.load(file)
         return CharacterProfile(
             profile_data["name"],
+            profile_data.get("appearance", ""),
             profile_data.get("personality_traits", []),
             profile_data.get("interests", []),
             profile_data.get("background_story", ""),
@@ -38,6 +39,7 @@ class LiaLama:
             profile_data.get("values", []),
             profile_data.get("user_preferences", {})
         )
+
 
     def _compute_embedding(self, text: str) -> np.ndarray:
         """
