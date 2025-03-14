@@ -23,7 +23,7 @@ def generate_scene_prompt(image_idea: str) -> str:
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message}
         ],
-        max_tokens=250
+        max_tokens=250,
     )
     return response.choices[0].message.content.strip()
 
@@ -37,7 +37,6 @@ def generate_technical_prompt(image_idea: str, post_category: str, persona) -> s
     - For general posts, it simply refines the provided image idea into a vivid scene description,
       with no personality details.
       
-    A fixed seed can be used later in the image-generation call for further consistency.
     """
     default_settings = (
         "Ultra-realistic, high-resolution 8K photograph captured on a Nikon D850 with a 50mm f/1.8 lens. "

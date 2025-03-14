@@ -6,6 +6,8 @@ from src.utils.post_generation_agents import generate_weighted_post_plan
 from src.utils.prompt_engineer import generate_technical_prompt
 from src.utils.api_image_generation import generate_image
 from src.utils.instagram_integration import InstagramIntegration
+from src.utils.post_tracker import log_post
+from datetime import datetime
 
 class LiaManager:
     def __init__(self, persona, persona_name: str, display_name: str):
@@ -44,7 +46,7 @@ class LiaManager:
         print("   ", technical_prompt)
         
         try:
-            image_source = generate_image(technical_prompt)
+            image_source = generate_image(technical_prompt,seed=42)
         except Exception as e:
             print("🤖 Lia (Manager): Failed to generate image:", e)
             return
@@ -77,6 +79,20 @@ class LiaManager:
                     return
                 print("🤖 Lia (Manager): Post successful!", result)
                 self.last_post_time = datetime.now()
+
+                dynamic_scene = technical_prompt.split("Scene: ", 1)[-1]  # Example: extract the scene part
+
+                post_details = {
+                    "timestamp": self.last_post_time.isoformat(),
+                    "caption": caption,
+                    "image_idea": plan.get("image_idea"),
+                    "dynamic_scene": dynamic_scene,
+                    "technical_prompt": technical_prompt,
+                    "image_source": image_source,
+                    "post_category": post_category,
+                    "result": result  # Additional metadata from Instagram
+                }
+                log_post(post_details)
             except Exception as e:
                 print("🤖 Lia (Manager): Failed to post due to:", e)
         else:
