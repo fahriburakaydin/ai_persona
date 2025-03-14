@@ -39,7 +39,7 @@ def generate_technical_prompt(image_idea: str, post_category: str, persona) -> s
       
     """
     default_settings = (
-        "Ultra-realistic, high-resolution 8K photograph captured on a Nikon D850 with a 50mm f/1.8 lens. "
+        "Ultra-realistic, high-resolution 8K photograph captured on a Nikon D850 with a 50mm f/1.8 lens. The photographic quality ensures hyper-realistic detail, with cinematic lighting, natural color grading, and a perfectly balanced high dynamic range. "
     )
     
     # Refine the generic image idea into a vivid, detailed scene description.

@@ -1,5 +1,4 @@
 import requests
-import tempfile
 import time
 import os
 from dotenv import load_dotenv
@@ -11,7 +10,12 @@ hf_api_key = os.getenv("HUGGINGFACE_API_KEY_2")
 API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-dev"
 HEADERS = {"Authorization": f"Bearer {hf_api_key}"}  # Replace with your token
 
-def query(prompt: str, seed: int = 42, max_retries: int = 5, backoff_factor: float = 5.0) -> bytes:
+# Define the directory to store images.
+IMAGE_DIR = os.path.join(os.getcwd(), "images")
+if not os.path.exists(IMAGE_DIR):
+    os.makedirs(IMAGE_DIR)
+
+def query(prompt: str, seed: int = 42, max_retries: int = 5, backoff_factor: float = 7.0) -> bytes:
     """
     Sends a prompt to the Hugging Face Inference API and returns the binary image data.
     Includes a seed parameter for consistency.
@@ -41,10 +45,12 @@ def generate_image(prompt: str, seed: int = 42) -> str:
     The fixed seed parameter ensures consistent outputs.
     """
     image_data = query(prompt, seed=seed) 
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-    with open(temp_file.name, "wb") as f:
+    # Use a unique filename based on the current timestamp.
+    filename = f"image_{int(time.time())}.png"
+    file_path = os.path.join(IMAGE_DIR, filename)
+    with open(file_path, "wb") as f:
         f.write(image_data)
-    return temp_file.name
+    return file_path
 
 if __name__ == "__main__":
     prompt = input("Enter image prompt: ")

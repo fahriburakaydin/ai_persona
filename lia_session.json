@@ -1,0 +1,31 @@
+{
+    "uuids": {
+        "phone_id": "79868cc3-f1df-4654-8c5e-84b821577420",
+        "uuid": "9fa83c97-4123-4bb9-91fc-38f2cc46f223",
+        "client_session_id": "de26092a-a6cb-4a22-9946-4aa8676442ea",
+        "advertising_id": "d87e2d25-8357-493c-a02d-30d5b322b437",
+        "android_device_id": "android-148624c649c2b994",
+        "request_id": "ac851c9e-de81-49e5-b59c-3c377c9f959d",
+        "tray_session_id": "8b643546-80f0-4229-a8a4-24965dfb9d4c"
+    },
+    "mid": "Z8nlXAABAAFTeS-QzcOrCqOea7wm",
+    "ig_u_rur": null,
+    "ig_www_claim": null,
+    "authorization_data": {
+        "ds_user_id": "72180613348",
+        "sessionid": "72180613348%3A0lbQE8iblebep7%3A3%3AAYfn03nYfVakbHIfu--pyUe5lCxx9Ekd6HLyN890kw"
+    },
+    "cookies": {},
+    "last_login": 1741284711.6293209,
+    "device_settings": {
+        "manufacturer": "realme",
+        "model": "RMX1993",
+        "android_version": 25,
+        "android_release": "7.1.2"
+    },
+    "user_agent": "Instagram 289.0.0.30.120 Android (25/7.1.2; 380dpi; 1080x1920; unknown/Android; realme RMX1993; RMX1993; qcom; en_US; 367216753)",
+    "country": "US",
+    "country_code": 1,
+    "locale": "en_US",
+    "timezone_offset": -14400
+}

@@ -6,7 +6,7 @@ from src.utils.post_generation_agents import generate_weighted_post_plan
 from src.utils.prompt_engineer import generate_technical_prompt
 from src.utils.api_image_generation import generate_image
 from src.utils.instagram_integration import InstagramIntegration
-from src.utils.post_tracker import log_post
+from src.utils.post_tracker import log_post_draft, update_post_status, get_all_posts
 from datetime import datetime
 
 class LiaManager:
@@ -25,15 +25,13 @@ class LiaManager:
         return gap >= timedelta(hours=MIN_POST_GAP_HOURS)
 
     def create_post_autonomously(self):
-        """Generates a creative post plan, uses the expert prompt engineer for the technical prompt,
-        and then asks for final approval before posting."""
         print("🤖 Lia (Manager): I've decided it's a good time for a new post based on our context.")
         conversation_context = self.persona.memory.retrieve_short_term_memory()
         plan = generate_weighted_post_plan(self.persona, conversation_context)
         print("🤖 Lia (Manager): My post plan is:")
-        print("post_category: ", plan.get("post_category"))
-        print("   Image Idea: ", plan.get("image_idea"))
-        print("   Caption: ", plan.get("caption"))
+        print("   Post Category:", plan.get("post_category"))
+        print("   Image Idea:", plan.get("image_idea"))
+        print("   Caption:", plan.get("caption"))
         
         approval = input("🤖 Lia (Manager): Do you approve this post plan? (yes/no): ").strip().lower()
         if approval not in ["yes", "y"]:
@@ -46,7 +44,7 @@ class LiaManager:
         print("   ", technical_prompt)
         
         try:
-            image_source = generate_image(technical_prompt,seed=42)
+            image_source = generate_image(technical_prompt, seed=42)
         except Exception as e:
             print("🤖 Lia (Manager): Failed to generate image:", e)
             return
@@ -55,6 +53,27 @@ class LiaManager:
             return
 
         caption = plan.get("caption", "")
+        # Extract dynamic scene part from the technical prompt (after "Scene: ")
+        dynamic_scene = technical_prompt.split("Scene: ", 1)[-1]
+        
+        # Log the draft post immediately with is_posted = 0.
+        current_timestamp = datetime.now().isoformat()
+        draft_details = {
+            "timestamp": current_timestamp,
+            "caption": caption,
+            "image_idea": plan.get("image_idea"),
+            "dynamic_scene": dynamic_scene,
+            "technical_prompt": technical_prompt,
+            "image_source": image_source,  
+            "post_category": post_category,
+            "insta_post_id": "",
+            "insta_code": "",
+            "is_posted": 0
+        }
+        draft_id = log_post_draft(draft_details)
+        print(f"🤖 Lia (Manager): Draft post logged with ID {draft_id}")
+        
+        # Final approval for posting.
         print("\n🤖 Lia (Manager): Here is the final post proposal:")
         print("    Image Source:", image_source)
         print("    Caption:", caption)
@@ -62,7 +81,7 @@ class LiaManager:
         if final_confirm not in ["yes", "y"]:
             print("🤖 Lia (Manager): Post creation cancelled based on your review.")
             return
-
+        
         ig_bot = InstagramIntegration(self.persona_name)
         if ig_bot.login():
             try:
@@ -80,23 +99,21 @@ class LiaManager:
                 print("🤖 Lia (Manager): Post successful!", result)
                 self.last_post_time = datetime.now()
 
-                dynamic_scene = technical_prompt.split("Scene: ", 1)[-1]  # Example: extract the scene part
-
-                post_details = {
-                    "timestamp": self.last_post_time.isoformat(),
-                    "caption": caption,
-                    "image_idea": plan.get("image_idea"),
-                    "dynamic_scene": dynamic_scene,
-                    "technical_prompt": technical_prompt,
-                    "image_source": image_source,
-                    "post_category": post_category,
-                    "result": result  # Additional metadata from Instagram
+                # Extract key Instagram fields from the result.
+                insta_post_id = result.get("pk", "") if isinstance(result, dict) else ""
+                insta_code = result.get("code", "") if isinstance(result, dict) else ""
+                updated_data = {
+                    "insta_post_id": insta_post_id,
+                    "insta_code": insta_code,
+                    "is_posted": 1
                 }
-                log_post(post_details)
+                update_post_status(draft_id, updated_data)
+                print("🤖 Lia (Manager): Draft updated with post details.")
             except Exception as e:
                 print("🤖 Lia (Manager): Failed to post due to:", e)
         else:
             print("🤖 Lia (Manager): Instagram login failed; cannot post.")
+
 
     def run(self):
         """Continuously checks if a post should be created and creates one if needed."""
