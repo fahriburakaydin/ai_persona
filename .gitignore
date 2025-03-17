@@ -30,3 +30,5 @@ static/uploads/
 .bak
 .index
 .db
+memory_store/chroma.sqlite3
+*.pyc
