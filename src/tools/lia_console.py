@@ -4,6 +4,8 @@ from src.utils.openai_integration import LiaLama
 from src.utils.intent_detector import detect_intent  # Your existing intent detector
 from src.utils.instagram_commands import handle_instagram_command
 from src.utils.schedule_commands import schedule_post_job, list_scheduled_jobs, cancel_scheduled_job
+from src.utils.logger import logger
+
 
 # Configurable intent confidence threshold.
 INTENT_CONFIDENCE_THRESHOLD = os.getenv("INTENT_CONFIDENCE_THRESHOLD", 0.45)
@@ -94,4 +96,7 @@ def interactive_chat():
             break
 
 if __name__ == "__main__":
-    interactive_chat()
+    try:
+        interactive_chat()
+    except Exception as e:
+        logger.exception("Unhandled exception occurred: %s", e)

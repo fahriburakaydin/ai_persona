@@ -11,7 +11,7 @@ def generate_scene_prompt(image_idea: str) -> str:
     The output is plain and descriptive—without any introductory commentary.
     """
     system_message = (
-        "You are an expert prompt engineer specialized in text-to-image generation. "
+        "You are an expert prompt engineer specialized in text-to-image generation.Your prompt will be sent to an API image generation model. "
         "Your task is to refine a generic image idea into a detailed and technical scene description. "
         "Output only the final descriptive prompt."
     )

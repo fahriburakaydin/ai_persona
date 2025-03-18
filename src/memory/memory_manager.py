@@ -61,18 +61,26 @@ class MemoryManager:
             self.short_term_memory.clear()  # Clear short-term memory after summarization
             print(f"\n(Lia has updated her long-term memory! 🧠) {summary}")
 
+    
     def generate_summary(self, prompt: str) -> str:
-        """
-        Uses the LLM to generate a summary of past conversations.
-        """
         import openai
-        openai.api_key = os.getenv("OPENAI_API_KEY")
-
-        response = openai.chat.completions.create(
-            model="gpt-4-turbo",
-            messages=[{"role": "system", "content": prompt}]
-        )
-        print(f"Summary Generation Token Usage: {response.usage}")  # Debugging
-
-        self.token_tracker.log_usage("memory_summary", response.usage)
-        return response.choices[0].message.content.strip()
+        from src.config import OPENAI_API_KEY
+        if not OPENAI_API_KEY:
+            logger.error("OPENAI_API_KEY is missing in the configuration.")
+            raise Exception("Missing OPENAI_API_KEY")
+        openai.api_key = OPENAI_API_KEY
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[{"role": "system", "content": prompt}]
+            )
+        except Exception as e:
+            logger.error("OpenAI API call failed in generate_summary: %s", e)
+            raise
+        self._log_token_usage("memory_summary", response)
+        try:
+            summary = response.choices[0].message.content.strip()
+        except Exception as e:
+            logger.error("Error parsing OpenAI response in generate_summary: %s", e)
+            raise
+        return summary
