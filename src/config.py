@@ -35,15 +35,34 @@ INTENT_CONFIDENCE_THRESHOLD = 0.45
 
 
 # Rate limiting and cycle settings for autonomous engagement:
-ACTION_LIMIT_PER_HOUR = 20  # Maximum number of like/comment actions per hour.
-ENGAGEMENT_CYCLE_MIN = 300   # Minimum seconds between engagement cycles (e.g., 5 minutes)
-ENGAGEMENT_CYCLE_MAX = 600   # Maximum seconds between cycles (e.g., 10 minutes)
+ACTION_LIMIT_PER_HOUR = 15# Maximum number of like/comment actions per hour.
+ENGAGEMENT_CYCLE_MIN = 600   # Minimum seconds between engagement cycles (e.g., 5 minutes)
+ENGAGEMENT_CYCLE_MAX = 1200   # Maximum seconds between cycles (e.g., 10 minutes)
 
 # Engagement thresholds:
-POST_EXPOSURE_THRESHOLD = 10  # Minimum number of likes a post must have to be engaged with
+POST_EXPOSURE_THRESHOLD = 200  # Minimum number of likes a post must have to be engaged with
 
 # Commenting mode:
-USE_ADVANCED_COMMENT = False  # Set to True to use advanced comment generation, False for simple comments.
+USE_ADVANCED_COMMENT = True  # Set to True to use advanced comment generation, False for simple comments.
 
 # Advanced commenting rate limit:
 ADVANCED_COMMENT_LIMIT_PER_HOUR = 1
+
+# Global switch to enable/disable commenting
+USE_COMMENTING = False
+
+HUMAN_DELAY_PROFILES = {
+        'default': {'min': 1.2, 'max': 5.5, 'alpha': 2, 'beta': 0.8},
+        'post_like': {'min': 2.5, 'max': 9.5, 'alpha': 3, 'beta': 1.2},
+        'comment': {'min': 4.0, 'max': 12.0, 'alpha': 2.5, 'beta': 1.5},
+        'story_view': {'min': 1.8, 'max': 3.2, 'alpha': 2, 'beta': 0.7},
+        'scroll': {'min': 0.5, 'max': 1.5, 'alpha': 1.5, 'beta': 0.4}
+    }
+
+SAFE_HOURLY_LIMITS = {
+        'like': 18,
+        'comment': 5,
+        'advanced_comment': 2,
+        'story_view': 15,
+        'scroll': 8
+    }

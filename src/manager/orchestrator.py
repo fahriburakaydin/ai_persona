@@ -2,34 +2,33 @@
 
 import threading
 from src.manager.lia_manager import LiaManager
-from src.manager.autonomous_engagement import run_autonomous_engagement
+from src.manager.autonomous_engagement import run_safe_engagement
+from src.tools.lia_console import interactive_chat
 from src.utils.openai_integration import LiaLama
 
-def run_interactive_manager():
+def run_interactive_manager(persona):
     """
-    Runs the interactive Lia manager.
-    This function starts an interactive console where you can provide input.
+    Initializes Lia's profile and runs her interactive manager.
     """
-    # Load Lia's profile and initialize her manager.
-    persona = LiaLama("src/profiles/lia_lama.json", debug=True)
     first_name = persona.profile.name.split()[0]
     persona_name = first_name.lower()
     display_name = first_name
     manager = LiaManager(persona, persona_name, display_name)
-    # This will block and allow you to interact.
-    manager.run()
+    manager.run()  # This call blocks and handles interactive input.
 
-def run_autonomous_engagement():
+def run_autonomous_engagement_thread(persona):
     """
-    Runs the autonomous engagement module.
-    This function will continuously monitor and engage with posts in the background.
+    Runs the autonomous engagement module, passing the persona.
     """
-    run_autonomous_engagement()
+    run_safe_engagement(persona)
 
 if __name__ == "__main__":
-    # Start the autonomous engagement in a background daemon thread.
-    engagement_thread = threading.Thread(target=run_autonomous_engagement, daemon=True)
+    # Create the persona instance.
+    persona = LiaLama("src/profiles/lia_lama.json", debug=True)
+    
+    # Start autonomous engagement in a background daemon thread, passing the persona.
+    engagement_thread = threading.Thread(target=run_autonomous_engagement_thread, args=(persona,), daemon=True)
     engagement_thread.start()
     
     # Run the interactive manager in the main thread.
-    run_interactive_manager()
+    run_interactive_manager(persona)
