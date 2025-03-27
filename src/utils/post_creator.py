@@ -1,187 +1,137 @@
 import os
-import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from src.utils.api_image_generation import generate_image
 from src.utils.instagram_integration import InstagramIntegration
+from src.utils.post_generation_agents import generate_weighted_post_plan
+from src.utils.post_tracker import log_post_draft, update_post_status
+from src.utils.prompt_engineer import generate_technical_prompt
 
-def validate_time(time_str: str) -> bool:
-    """Validate that time_str is in HH:MM 24-hour format."""
-    pattern = r'^(?:[01]\d|2[0-3]):[0-5]\d$'
-    return re.match(pattern, time_str) is not None
-
-def interactive_post_creation(persona_name: str, display_name: str) -> None:
+def interactive_post_creation(persona_name: str, display_name: str, persona) -> None:
     """
-    Handles the multi-turn dialogue for generating a post.
-    This function collects all necessary inputs from the user,
-    confirms the details, generates an image if needed, and then
-    either posts immediately or schedules the post.
-    
-    You can type "back" at any prompt to return to the previous step.
-    For the image, you can choose to generate, use an existing file/URL,
-    or use a random image from picsum.photos.
+    Interactive post creation flow:
+      1. Lia asks if you already have a post plan.
+         - If yes: you manually supply the image (URL or local path) and caption.
+         - If no: Lia generates a post plan (image idea, caption, post_category) using conversation context.
+      2. If Lia generates the plan, she uses it to produce a technical prompt and generate the image.
+      3. The final post proposal (image source and caption) is shown.
+      4. Upon your final confirmation, Lia posts to Instagram.
     """
-    print("🤖 Lia: Let's create a new post together!")
+    # Step 1: Determine if a plan is provided or generated.
+    plan_choice = input("🤖 Lia: Do you already have a post plan? (yes/no): ").strip().lower()
     
-    data = {}
-    step = 1
-    while step <= 6:
-        if step == 1:
-            ans = input("🤖 Lia: Do you want this post to be immediate ('now') or scheduled? (now/scheduled): ").strip().lower()
-            if ans == "back":
-                print("🤖 Lia: Already at the first step.")
-                continue
-            if ans not in ["now", "scheduled"]:
-                print("🤖 Lia: Please answer with 'now' or 'scheduled'.")
-                continue
-            data['post_type'] = ans
-            step += 1
-            continue
-
-        if step == 2:
-            if data['post_type'] == "scheduled":
-                ans = input("🤖 Lia: At what time should I post it? (HH:MM, 24-hour format): ").strip()
-                if ans.lower() == "back":
-                    step -= 1
-                    continue
-                if not validate_time(ans):
-                    print("🤖 Lia: The time format seems off. Please use HH:MM (e.g., '10:00').")
-                    continue
-                data['scheduled_time'] = ans
-                ans2 = input("🤖 Lia: Should I post this daily or just once? (daily/once): ").strip().lower()
-                if ans2 == "back":
-                    continue
-                if ans2 not in ["daily", "once"]:
-                    print("🤖 Lia: Please answer with 'daily' or 'once'.")
-                    continue
-                data['frequency'] = ans2
-            step += 1
-            continue
-
-        if step == 3:
-            ans = input("🤖 Lia: Should I generate a new image, use an existing one, or pick a random image? (generate/existing/random): ").strip().lower()
-            if ans == "back":
-                step -= 1
-                continue
-            if ans not in ["generate", "existing", "random"]:
-                print("🤖 Lia: Please answer with 'generate', 'existing', or 'random'.")
-                continue
-            data['image_choice'] = ans
-            step += 1
-            continue
-
-        if step == 4:
-            if data['image_choice'] == "existing":
-                ans = input("🤖 Lia: Please provide the image (URL or full local file path): ").strip()
-                if ans.lower() == "back":
-                    step -= 1
-                    continue
-                if ans.startswith("http"):
-                    data['image_source'] = ans
-                elif os.path.exists(ans):
-                    data['image_source'] = ans
-                else:
-                    print("🤖 Lia: I can't find that file. Please check the path or provide a valid URL.")
-                    continue
-            elif data['image_choice'] == "random":
-                # Use a random image from picsum.photos
-                data['image_source'] = "https://picsum.photos/1080/1080"
-                print("🤖 Lia: I'll use a random image from picsum.photos.")
-            else:
-                # Generate a new image.
-                ans = input("🤖 Lia: Would you like to provide an image prompt, or should I generate one for you? (provide/generate): ").strip().lower()
-                if ans == "back":
-                    step -= 1
-                    continue
-                if ans not in ["provide", "generate"]:
-                    print("🤖 Lia: Please answer with 'provide' or 'generate'.")
-                    continue
-                data['prompt_choice'] = ans
-                if ans == "provide":
-                    ans2 = input("🤖 Lia: Please enter the image prompt: ").strip()
-                    if ans2.lower() == "back":
-                        continue
-                    data['image_prompt'] = ans2
-                else:
-                    generated_prompt = persona.generate_response("Generate an inspiring image prompt for an Instagram post.")
-                    print(f"🤖 Lia: I'll use this generated prompt: '{generated_prompt}'")
-                    data['image_prompt'] = generated_prompt
-                print("🤖 Lia: Generating image, please wait...")
-                try:
-                    image_path = generate_image(data['image_prompt'])
-                except Exception as e:
-                    print(f"🤖 Lia: I encountered an error during image generation: {e}")
-                    return
-                if not image_path:
-                    print("🤖 Lia: I couldn't generate the image. Let's try again later.")
-                    return
-                data['image_source'] = image_path
-            step += 1
-            continue
-
-        if step == 5:
-            ans = input("🤖 Lia: Would you like to provide a caption or should I generate one? (provide/generate): ").strip().lower()
-            if ans == "back":
-                step -= 1
-                continue
-            if ans not in ["provide", "generate"]:
-                print("🤖 Lia: Please answer with 'provide' or 'generate'.")
-                continue
-            data['caption_choice'] = ans
-            if ans == "provide":
-                ans2 = input("🤖 Lia: Please enter the caption for the post: ").strip()
-                if ans2.lower() == "back":
-                    continue
-                data['caption'] = ans2
-            else:
-                generated_caption = persona.generate_response("Generate a creative caption for an Instagram post.")
-                print(f"🤖 Lia: I'll use this generated caption: '{generated_caption}'")
-                data['caption'] = generated_caption
-            step += 1
-            continue
-
-        if step == 6:
-            print("\n🤖 Lia: Here's what I've gathered:")
-            print(f"    Post Type: {data.get('post_type')}")
-            if data.get('post_type') == "scheduled":
-                print(f"    Scheduled Time: {data.get('scheduled_time')}")
-                print(f"    Frequency: {data.get('frequency')}")
-            print(f"    Image Source: {data.get('image_source')}")
-            print(f"    Caption: {data.get('caption')}\n")
-            ans = input("🤖 Lia: Is this correct? (yes/no/back): ").strip().lower()
-            if ans == "back":
-                step -= 1
-                continue
-            if ans not in ["yes", "y"]:
-                print("🤖 Lia: Okay, let's cancel this post creation.")
+    if plan_choice in ["yes", "y"]:
+        # Manual entry: User provides the image and caption.
+        image_source = input("🤖 Lia: Please provide the image (URL or local file path): ").strip()
+        if not (image_source.startswith("http") or os.path.exists(image_source)):
+            print("🤖 Lia: The image source is invalid. Post creation cancelled.")
+            return
+        caption = input("🤖 Lia: Please provide the caption for the post: ").strip()
+        post_category = "self"  # Defaulting to 'self'; adjust if needed.
+        # In manual mode, we don't generate a dynamic scene or technical prompt.
+    else:
+        # Automated process: Lia generates a post plan using conversation context.
+        print("🤖 Lia: Let me think about a great post idea based on our conversation...")
+        conversation_context = persona.memory.retrieve_short_term_memory()
+        plan = generate_weighted_post_plan(persona, conversation_context)
+        print("🤖 Lia: Here's the post plan I came up with:")
+        print("   Post Category:", plan.get("post_category"))
+        print("   Image Idea:", plan.get("image_idea"))
+        print("   Caption:", plan.get("caption"))
+        
+        approval = input("🤖 Lia: Do you approve this post plan? (yes/no): ").strip().lower()
+        if approval not in ["yes", "y"]:
+            feedback = input("🤖 Lia: Please provide feedback to refine the plan: ").strip()
+            refined_context = conversation_context + " Feedback: " + feedback
+            plan = generate_weighted_post_plan(persona, refined_context)
+            print("🤖 Lia: Here's the refined post plan:")
+            print("   Post Category:", plan.get("post_category"))
+            print("   Image Idea:", plan.get("image_idea"))
+            print("   Caption:", plan.get("caption"))
+            approval = input("🤖 Lia: Do you approve this refined plan? (yes/no): ").strip().lower()
+            if approval not in ["yes", "y"]:
+                print("🤖 Lia: Okay, post creation cancelled.")
                 return
-            step += 1
-            continue
-
-    # Execute the post creation.
-    if data.get('post_type') == "now":
+        
+        post_category = plan.get("post_category", "general")
+        # Generate a technical prompt using the image idea.
+        technical_prompt = generate_technical_prompt(plan.get("image_idea", ""), post_category, persona)
+        print("\n🤖 Lia: Generated technical prompt:")
+        print("   ", technical_prompt)
+        
+        try:
+            image_source = generate_image(technical_prompt, seed=42)
+        except Exception as e:
+            print("🤖 Lia: Failed to generate image:", e)
+            return
+        if not image_source:
+            print("🤖 Lia: Could not generate image. Post aborted.")
+            return
+        caption = plan.get("caption", "")
+    
+    # Log the post draft into the database before final approval.
+    current_timestamp = datetime.now().isoformat()
+    # For automated posts, we extract the dynamic scene from the technical prompt if available.
+    dynamic_scene = ""
+    if plan_choice not in ["yes", "y"]:
+        dynamic_scene = technical_prompt.split("Scene: ", 1)[-1] if "Scene: " in technical_prompt else ""
+    draft_details = {
+        "timestamp": current_timestamp,
+        "caption": caption,
+        "image_idea": plan.get("image_idea") if plan_choice not in ["yes", "y"] else "User Provided",
+        "dynamic_scene": dynamic_scene,
+        "technical_prompt": technical_prompt if plan_choice not in ["yes", "y"] else "",
+        "image_source": image_source,  
+        "post_category": post_category,
+        "insta_post_id": "",
+        "insta_code": "",
+        "is_posted": 0
+    }
+    draft_id = log_post_draft(draft_details)
+    print("🤖 Lia: Draft post logged with ID", draft_id)
+    
+    # Step 4: Final Post Proposal and Confirmation
+    print("\n🤖 Lia: Here's the final post proposal:")
+    print("    Image Source:", image_source)
+    print("    Caption:", caption)
+    final_confirm = input("🤖 Lia: Should I go ahead and post this? (Type 'now' to post immediately, 'schedule' to schedule, or 'cancel' to abort): ").strip().lower()
+    if final_confirm == "cancel":
+        print("🤖 Lia: Post creation cancelled.")
+        return
+    elif final_confirm == "now":
         ig_bot = InstagramIntegration(persona_name)
         if ig_bot.login():
-            if data.get('image_source').startswith("http"):
-                try:
-                    result = ig_bot.post_content(data.get('image_source'), data.get('caption'))
-                    print("🤖 Lia: Post successful!", result)
-                except Exception as e:
-                    print("🤖 Lia: Failed to post due to:", e)
-            elif os.path.exists(data.get('image_source')):
-                try:
+            try:
+                if image_source.startswith("http"):
+                    result = ig_bot.post_content(image_source, caption)
+                elif os.path.exists(image_source):
                     result = ig_bot.client.photo_upload(
-                        path=data.get('image_source'),
-                        caption=data.get('caption'),
+                        path=image_source,
+                        caption=caption,
                         extra_data={"disable_comments": False}
                     )
-                    print("🤖 Lia: Post successful!", result)
-                except Exception as e:
-                    print("🤖 Lia: Failed to post due to:", e)
-            else:
-                print("🤖 Lia: The image source is invalid.")
+                else:
+                    print("🤖 Lia: The image source is invalid.")
+                    return
+                print("🤖 Lia: Post successful!", result)
+                # Update DB with Instagram post details.
+                insta_post_id = result.get("pk", "") if isinstance(result, dict) else ""
+                insta_code = result.get("code", "") if isinstance(result, dict) else ""
+                updated_data = {
+                    "insta_post_id": insta_post_id,
+                    "insta_code": insta_code,
+                    "is_posted": 1
+                }
+                update_post_status(draft_id, updated_data)
+                print("🤖 Lia: Database updated with post details.")
+            except Exception as e:
+                print("🤖 Lia: Failed to post due to:", e)
         else:
-            print("🤖 Lia: Instagram login failed; cannot post right now.")
-    else:
+            print("🤖 Lia: Instagram login failed; cannot post now.")
+    elif final_confirm == "schedule":
+        time_str = input("🤖 Lia: At what time should I schedule the post? (HH:MM): ").strip()
+        frequency = input("🤖 Lia: Should I schedule it daily or just once? (daily/once): ").strip().lower()
         from src.tools.lia_console import schedule_post_job
-        schedule_post_job(data.get('scheduled_time'), data.get('frequency'), data.get('image_source'), data.get('caption'), persona_name)
-        print("🤖 Lia: Your post has been scheduled.")
+        result = schedule_post_job(time_str, frequency, image_source, caption, persona_name)
+        print("🤖 Lia:", result)
+    else:
+        print("🤖 Lia: Unrecognized option. Post creation cancelled.")

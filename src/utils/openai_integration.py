@@ -9,12 +9,15 @@ from src.memory.memory_manager import MemoryManager
 from src.memory.feedback_manager import FeedbackManager
 from src.memory.personality_manager import PersonalityManager
 from src.utils.token_tracker import TokenUsageTracker  # Import Token Tracker
+from src.config import OPENAI_API_KEY
 
 # Load environment variables
 load_dotenv()
 
-# Retrieve API key from .env file
-openai.api_key = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+        logger.error("OPENAI_API_KEY is missing in the configuration.")
+        raise Exception("Missing OPENAI_API_KEY")
+openai.api_key = OPENAI_API_KEY
 
 class LiaLama:
     def __init__(self, profile_path, debug=False):
@@ -31,6 +34,7 @@ class LiaLama:
             profile_data = json.load(file)
         return CharacterProfile(
             profile_data["name"],
+            profile_data.get("appearance", ""),
             profile_data.get("personality_traits", []),
             profile_data.get("interests", []),
             profile_data.get("background_story", ""),
@@ -38,6 +42,7 @@ class LiaLama:
             profile_data.get("values", []),
             profile_data.get("user_preferences", {})
         )
+
 
     def _compute_embedding(self, text: str) -> np.ndarray:
         """
