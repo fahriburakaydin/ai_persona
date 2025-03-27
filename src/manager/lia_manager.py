@@ -2,7 +2,7 @@ import os
 import time
 import logging
 from datetime import datetime, timedelta
-from src.config import MIN_POST_GAP_HOURS
+from src.config import MIN_POST_GAP_HOURS, FULL_AUTONOMOUS_MODE
 from src.utils.post_generation_agents import generate_weighted_post_plan
 from src.utils.prompt_engineer import generate_technical_prompt
 from src.utils.api_image_generation import generate_image
@@ -14,11 +14,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class LiaManager:
-    def __init__(self, persona, persona_name: str, display_name: str):
+    def __init__(self, persona, persona_name: str,):
         self.persona = persona
         self.persona_name = persona_name
-        self.display_name = display_name
         self.last_post_time = None  # Track when the last post was made
+        self.ig_bot = InstagramIntegration(self.persona_name)
 
     def should_post(self) -> bool:
         """Decide whether Lia should create a new post based on the minimum time gap."""
@@ -29,15 +29,23 @@ class LiaManager:
         return gap >= timedelta(hours=MIN_POST_GAP_HOURS)
 
     def create_post_autonomously(self):
+        ig_bot = self.ig_bot
+        if not ig_bot.login():
+            logger.error("🤖 Lia (Manager): Instagram login failed; cannot post.")
+            return
         logger.info("🤖 Lia (Manager): I've decided it's a good time for a new post based on our context.")
+        logger.info(f"🤖 Lia (Debug): FULL_AUTONOMOUS_MODE is {FULL_AUTONOMOUS_MODE}")
+        
         conversation_context = self.persona.memory.retrieve_short_term_memory()
         plan = generate_weighted_post_plan(self.persona, conversation_context)
         logger.info("🤖 Lia (Manager): My post plan is:")
         logger.info("   Post Category: %s", plan.get("post_category"))
         logger.info("   Image Idea: %s", plan.get("image_idea"))
         logger.info("   Caption: %s", plan.get("caption"))
-        
-        approval = input("🤖 Lia (Manager): Do you approve this post plan? (yes/no): ").strip().lower()
+        if not FULL_AUTONOMOUS_MODE:
+            approval = input("🤖 Lia (Manager): Do you approve this post plan? (yes/no): ").strip().lower()
+        else:
+            approval = "yes"
         if approval not in ["yes", "y"]:
             logger.info("🤖 Lia (Manager): Post creation cancelled based on your feedback.")
             return
@@ -81,12 +89,15 @@ class LiaManager:
         logger.info("🤖 Lia (Manager): Here is the final post proposal:")
         logger.info("    Image Source: %s", image_source)
         logger.info("    Caption: %s", caption)
-        final_confirm = input("🤖 Lia (Manager): Do you approve the final post? (yes/no): ").strip().lower()
+        
+        if not FULL_AUTONOMOUS_MODE:
+            final_confirm = input("🤖 Lia (Manager): Do you approve the final post? (yes/no): ").strip().lower()
+        else:
+            final_confirm = "yes"
         if final_confirm not in ["yes", "y"]:
             logger.info("🤖 Lia (Manager): Post creation cancelled based on your review.")
             return
         
-        ig_bot = InstagramIntegration(self.persona_name)
         if ig_bot.login():
             max_attempts = 3
             result = None
@@ -139,8 +150,6 @@ class LiaManager:
 if __name__ == "__main__":
     from src.utils.openai_integration import LiaLama
     persona = LiaLama("src/profiles/lia_lama.json", debug=True)
-    first_name = persona.profile.name.split()[0]
-    persona_name = first_name.lower()
-    display_name = first_name
-    manager = LiaManager(persona, persona_name, display_name)
+    persona_name = persona.profile.name.split()[0].lower()
+    manager = LiaManager(persona, persona_name)
     manager.create_post_autonomously()

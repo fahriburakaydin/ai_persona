@@ -28,12 +28,12 @@ def generate_scene_prompt(image_idea: str) -> str:
     return response.choices[0].message.content.strip()
 
 def generate_technical_prompt(image_idea: str, post_category: str, persona) -> str:
-    """
+    f"""
     Generates a technical image prompt suitable for the text-to-image generation model.
     
     - It always starts with default photography settings.
     - For self posts, it prepends a fixed character description (pulled from persona.profile.appearance)
-      so that Lia's appearance remains consistent.
+      so that {persona}'s appearance remains CONSISTENT.
     - For general posts, it simply refines the provided image idea into a vivid scene description,
       with no personality details.
       

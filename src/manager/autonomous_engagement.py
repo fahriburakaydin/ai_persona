@@ -234,8 +234,7 @@ def engagement_cycle(ig_bot, persona, limiter):
 # MAIN CONTROLLER
 # ======================
 
-def run_safe_engagement(persona):
-    ig_bot = InstagramIntegration(persona.profile.name.lower())
+def run_safe_engagement(persona, ig_bot):
     if not ig_bot.login():
         print("Instagram login failed")
         return
@@ -260,4 +259,5 @@ def handle_error_shutdown(ig_bot):
 if __name__ == "__main__":
     from src.utils.openai_integration import LiaLama
     persona = LiaLama("src/profiles/lia_lama.json")
+    ig_bot = InstagramIntegration(persona.profile.name.split()[0].lower())
     run_safe_engagement(persona)

@@ -7,7 +7,10 @@ load_dotenv()
 
 # Credentials loaded from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+HUGGINGFACE_API_KEY_1 = os.getenv("HUGGINGFACE_API_KEY")
 HUGGINGFACE_API_KEY_2 = os.getenv("HUGGINGFACE_API_KEY_2")
+HUGGINGFACE_API_KEY_3 = os.getenv("HUGGINGFACE_API_KEY_3")
+
 INSTAGRAM_USERNAME = os.getenv("INSTAGRAM_USERNAME")
 INSTAGRAM_PASSWORD = os.getenv("INSTAGRAM_PASSWORD")
 
@@ -50,6 +53,8 @@ ADVANCED_COMMENT_LIMIT_PER_HOUR = 1
 
 # Global switch to enable/disable commenting
 USE_COMMENTING = False
+
+FULL_AUTONOMOUS_MODE = True
 
 HUMAN_DELAY_PROFILES = {
         'default': {'min': 1.2, 'max': 5.5, 'alpha': 2, 'beta': 0.8},

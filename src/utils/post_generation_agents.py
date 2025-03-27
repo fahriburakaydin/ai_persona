@@ -11,7 +11,7 @@ def compute_context_intensity(conversation_context: str) -> float:
     return intensity
 
 def generate_weighted_post_plan(persona, conversation_context: str, intensity_threshold: float = 0.5) -> dict:
-    """
+    f"""
     Generates a creative post plan based on conversation context and Lia's personality.
     The output is a JSON object with keys:
       - "image_idea": a creative description for the image.
@@ -19,7 +19,7 @@ def generate_weighted_post_plan(persona, conversation_context: str, intensity_th
       - "post_category": "self" if the post should feature Lia, or "general" otherwise.
       
     If the conversation context is strong (intensity >= threshold), it uses it;
-    otherwise, it defaults to a baseline prompt reflecting Lia’s stable personality.
+    otherwise, it defaults to a baseline prompt reflecting {persona}'s stable personality.
     """
     personality_details = f"Traits: {', '.join(persona.profile.personality_traits)}. Background: {persona.profile.background_story}"
     intensity = compute_context_intensity(conversation_context)
@@ -31,7 +31,7 @@ def generate_weighted_post_plan(persona, conversation_context: str, intensity_th
             f"Personality: {personality_details}\n"
             "Generate a JSON object with keys 'image_idea', 'caption', and 'post_category'. "
             "The 'image_idea' should be a creative description for an image, "
-            "the 'caption' should be engaging"
+            "the 'caption' should be engaging. NO HASHTAGS"
             "IF the image should feature a FEMALE PERSON 'post_category' should be 'self', otherwise 'general'."
             "ONLY IF the image does not include a woman figure/subject, the post category should be 'general'."
             "POST CATEGORY may EITHER BE 'SELF' or 'GENERAL'. Nothing else is allowed!"
@@ -44,7 +44,7 @@ def generate_weighted_post_plan(persona, conversation_context: str, intensity_th
             "The post can be either about you or a general topic."
             "Generate a JSON object with keys 'image_idea', 'caption', and 'post_category'. "
             "The 'image_idea' should be a creative description for an image, "
-            "the 'caption' should be engaging"
+            "the 'caption' should be engaging. NO HASHTAGS!"
             "the 'caption' should adhere to YOUR COMMUNICATION STYLE and TONE."
             "IF the image should feature a FEMALE PERSON 'post_category' should be 'self', otherwise 'general'."
             "ONLY IF the image does not include a woman figure/subject, the post category should be 'general'."
