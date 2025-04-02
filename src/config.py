@@ -30,7 +30,7 @@ ENGAGEMENT_UPDATE_INTERVAL = 24  # in hours
 LEARNING_RATE = 0.1
 
 # Autonomous posting triggers
-MIN_POST_GAP_HOURS = 6          # minimum hours between posts
+MIN_POST_GAP_HOURS = 12        # minimum hours between posts
 ENGAGEMENT_TRIGGER_THRESHOLD = 0.5  # placeholder for engagement-based decisions
 
 # Intent detection threshold (for interactive console)

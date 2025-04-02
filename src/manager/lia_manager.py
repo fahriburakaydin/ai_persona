@@ -152,4 +152,4 @@ if __name__ == "__main__":
     persona = LiaLama("src/profiles/lia_lama.json", debug=True)
     persona_name = persona.profile.name.split()[0].lower()
     manager = LiaManager(persona, persona_name)
-    manager.create_post_autonomously()
+    manager.run()

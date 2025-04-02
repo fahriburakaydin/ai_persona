@@ -9,3 +9,5 @@ transformers
 accelerate 
 torch 
 Pillow
+flask
+python-json-logger
