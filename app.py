@@ -3,6 +3,8 @@ import os
 from flask import Flask, jsonify
 from src.manager.lia_manager import LiaManager
 from src.utils.openai_integration import LiaLama
+from src.utils.instagram_integration import InstagramIntegration
+
 
 app = Flask(__name__)
 
@@ -12,7 +14,9 @@ def trigger_post():
         # Initialize Lia's persona
         persona = LiaLama("src/profiles/lia_lama.json", debug=True)
         persona_name = persona.profile.name.split()[0].lower()
-        manager = LiaManager(persona, persona_name)
+        ig_bot = InstagramIntegration(persona_name)
+        
+        manager = LiaManager(persona=persona, ig_bot=ig_bot, persona_name=persona_name)
         # Check if it's time to post using your existing logic
         if manager.should_post():
             manager.create_post_autonomously()

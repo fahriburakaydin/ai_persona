@@ -164,7 +164,7 @@ class LiaManager:
 
         # 6. Post to Instagram
         
-        if ig_bot.login():
+        if self.ig_bot.login():
             max_attempts = 3
             result = None
             for attempt in range(max_attempts):
@@ -172,7 +172,7 @@ class LiaManager:
                     if image_source.startswith("http"):
                         result = ig_bot.post_content(image_source, caption)
                     elif os.path.exists(image_source):
-                        result = ig_bot.client.photo_upload(
+                        result = self.ig_bot.client.photo_upload(
                             path=image_source,
                             caption=caption,
                             extra_data={"disable_comments": False}
@@ -194,8 +194,8 @@ class LiaManager:
         self.last_post_time = datetime.now()  # Update last post time on success
 
         # Assuming post_result is a dictionary-like object similar to instagrapi's Media:
-        insta_post_id = getattr(post_result, 'pk', '') if post_result else ''
-        insta_code = getattr(post_result, 'code', '') if post_result else ''
+        insta_post_id = getattr(result, 'pk', '') if result else ''
+        insta_code = getattr(result, 'code', '') if result else ''
 
         if draft_id and (insta_post_id or insta_code):
             updated_data = {
