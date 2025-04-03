@@ -5,17 +5,19 @@ from typing import List
 from dotenv import load_dotenv
 from src.utils.token_tracker import TokenUsageTracker  # Import Token Tracker
 from src.database.memory_store import LongTermMemoryStore
+from src.utils.chroma_factory import get_chroma_client_and_embedder  # Import the factory
 
 load_dotenv()
 
 class MemoryManager:
-    def __init__(self, character_name: str, max_short_term_memory: int = 10, debug: bool = True):
+    def __init__(self, character_name: str, max_short_term_memory: int = 10, debug: bool = True, client=None, embedder=None):
         """
         Initializes the MemoryManager for managing short-term and long-term memory.
         """
         self.character_name = character_name
         self.short_term_memory = deque(maxlen=max_short_term_memory)  # FIFO buffer
-        self.memory_store = LongTermMemoryStore(character_name)  # Connect to long-term storage
+        # Use the provided client and embedder.
+        self.memory_store = LongTermMemoryStore(character_name, client, embedder)
         self.token_tracker = TokenUsageTracker()  # Initialize Token Tracking
         self.debug = debug  # Enable or disable debug mode
 

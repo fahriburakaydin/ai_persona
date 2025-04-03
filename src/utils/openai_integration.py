@@ -10,6 +10,8 @@ from src.memory.feedback_manager import FeedbackManager
 from src.memory.personality_manager import PersonalityManager
 from src.utils.token_tracker import TokenUsageTracker  # Import Token Tracker
 from src.config import OPENAI_API_KEY
+from src.utils.chroma_factory import get_chroma_client_and_embedder
+
 
 # Load environment variables
 load_dotenv()
@@ -22,12 +24,17 @@ openai.api_key = OPENAI_API_KEY
 class LiaLama:
     def __init__(self, profile_path, debug=False):
         self.profile = self.load_character_profile(profile_path)
-        self.memory = MemoryManager(self.profile.name)
-        self.feedback = FeedbackManager(self.profile.name)
-        self.personality = PersonalityManager(self.profile.name)
-        self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")  # Lightweight embedding model
-        self.token_tracker = TokenUsageTracker()  # Initialize Token Tracking
-        self.debug = debug  # Enable or disable debug mode
+        # Obtain shared dependencies from the centralized factory
+        self.client, self.embedder = get_chroma_client_and_embedder()
+        
+        # Pass the dependencies to all submodules
+        self.memory = MemoryManager(self.profile.name, client=self.client, embedder=self.embedder)
+        self.feedback = FeedbackManager(self.profile.name, client=self.client, embedder=self.embedder)
+        self.personality = PersonalityManager(self.profile.name, client=self.client, embedder=self.embedder)
+        
+        self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.token_tracker = TokenUsageTracker()
+        self.debug = debug
 
     def load_character_profile(self, profile_path):
         with open(profile_path, 'r') as file:
@@ -42,8 +49,7 @@ class LiaLama:
             profile_data.get("values", []),
             profile_data.get("user_preferences", {})
         )
-
-
+    
     def _compute_embedding(self, text: str) -> np.ndarray:
         """
         Computes the sentence embedding for a given text.

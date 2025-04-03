@@ -100,5 +100,14 @@ def get_all_posts() -> list:
     conn.close()
     return rows
 
+def get_latest_post_timestamp() -> str:
+    """Retrieves the timestamp of the most recent post."""
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT MAX(timestamp) FROM posts WHERE is_posted = 1")
+    latest_timestamp = c.fetchone()[0]
+    conn.close()
+    return datetime.fromisoformat(latest_timestamp) if latest_timestamp else None
+
 # Initialize the database when this module is imported.
 init_db()

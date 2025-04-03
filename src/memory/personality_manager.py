@@ -3,11 +3,11 @@ from collections import defaultdict
 from chromadb.utils import embedding_functions
 
 class PersonalityManager:
-    def __init__(self, character_name: str):
+    def __init__(self, character_name: str, client: chromadb.ClientAPI, embedder: embedding_functions.EmbeddingFunction):
         self.character_name = character_name.lower().replace(' ', '_')
-        self.client = chromadb.PersistentClient(path="./memory_store")
-        self.embedder = embedding_functions.SentenceTransformerEmbeddingFunction("all-MiniLM-L6-v2")
-        
+    
+        self.client = client
+        self.embedder = embedder
         self.collection = self.client.get_or_create_collection(
             name=f"{self.character_name}_personality",
             embedding_function=self.embedder
