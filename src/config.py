@@ -7,6 +7,7 @@ load_dotenv()
 
 # Credentials loaded from environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 HUGGINGFACE_API_KEY_1 = os.getenv("HUGGINGFACE_API_KEY")
 HUGGINGFACE_API_KEY_2 = os.getenv("HUGGINGFACE_API_KEY_2")
 HUGGINGFACE_API_KEY_3 = os.getenv("HUGGINGFACE_API_KEY_3")
@@ -54,10 +55,10 @@ ADVANCED_COMMENT_LIMIT_PER_HOUR = 1
 # Global switch to enable/disable commenting
 USE_COMMENTING = False
 
-FULL_AUTONOMOUS_MODE = True
+FULL_AUTONOMOUS_MODE = False
 
 HUMAN_DELAY_PROFILES = {
-        'default': {'min': 1.2, 'max': 5.5, 'alpha': 2, 'beta': 0.8},
+        'default': {'min': 3, 'max': 8, 'alpha': 2, 'beta': 0.8},
         'post_like': {'min': 2.5, 'max': 9.5, 'alpha': 3, 'beta': 1.2},
         'comment': {'min': 4.0, 'max': 12.0, 'alpha': 2.5, 'beta': 1.5},
         'story_view': {'min': 1.8, 'max': 3.2, 'alpha': 2, 'beta': 0.7},

@@ -1,22 +1,22 @@
 {
     "uuids": {
-        "phone_id": "db73fd2f-aad6-42c7-82c4-c420c14fcb24",
-        "uuid": "88d4768b-1d31-41e0-b0ab-aea93a41159b",
-        "client_session_id": "e7ecbed1-441f-4421-bbe2-e385a93de8d3",
-        "advertising_id": "9b5e8da3-6e24-4836-a3c3-3ea3d78aa0f8",
-        "android_device_id": "android-e789db7941c7408a",
-        "request_id": "2c621357-e586-4784-be0b-84c2229b87f3",
-        "tray_session_id": "e356a3ca-c6b5-4abe-a293-d7721562ca20"
+        "phone_id": "2cfeae62-935f-4ac9-a8a9-4590ea67cb28",
+        "uuid": "413d8754-77aa-4402-a2bf-18e9e43472cc",
+        "client_session_id": "36986e01-8cae-4d2d-8933-4656f545087e",
+        "advertising_id": "887fdb9f-4a18-40ba-b565-58ffbc94332f",
+        "android_device_id": "android-a2a5c6f1afd4d935",
+        "request_id": "5bb5bbe8-fb0b-4b27-be8c-d8286b520bfc",
+        "tray_session_id": "24c6b5fd-9717-45c8-bc36-498e5b742c0c"
     },
-    "mid": "Z9nDXgABAAEbnOboTmGeMw181Spr",
+    "mid": "Z_wiEQABAAFg8eH4w_4iiewfRyyc",
     "ig_u_rur": null,
     "ig_www_claim": null,
     "authorization_data": {
         "ds_user_id": "73453218759",
-        "sessionid": "73453218759%3AXKqtWPDxh7b6Mo%3A15%3AAYfid5WeAU7QJB1hJS2MFVVCWyhYpnUBhwdmRW07AQ"
+        "sessionid": "73453218759%3AFP7qFqf1Jn7lsk%3A9%3AAYd0W0oIyX5yf7d2ki88FDfZn81J5Tcf6AHYdQJQRw"
     },
     "cookies": {},
-    "last_login": 1742324589.8501394,
+    "last_login": 1744577059.5498838,
     "device_settings": {
         "manufacturer": "realme",
         "model": "RMX1993",

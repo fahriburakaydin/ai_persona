@@ -41,14 +41,13 @@ def generate_weighted_post_plan(persona, conversation_context: str, intensity_th
         prompt = (
             f"Personality: {personality_details}\n"
             "Generate a JSON object with keys 'image_idea', 'caption', and 'post_category' that reflects YOUR authentic, stable style."
-            "The post can be either about you or a general topic."
+            "The post should be either about you."
             "Generate a JSON object with keys 'image_idea', 'caption', and 'post_category'. "
             "The 'image_idea' should be a creative description for an image, "
             "the 'caption' should be engaging. NO HASHTAGS!"
             "the 'caption' should adhere to YOUR COMMUNICATION STYLE and TONE."
-            "IF the image should feature a FEMALE PERSON 'post_category' should be 'self', otherwise 'general'."
-            "ONLY IF the image does not include a woman figure/subject, the post category should be 'general'."
-            "POST CATEGORY may EITHER BE 'SELF' or 'GENERAL'. Nothing else is allowed!"
+            "The image should feature a FEMALE PERSON, and 'post_category' should be 'self'."
+            "POST CATEGORY can ONLY BE 'SELF'. Nothing else is allowed!"
         )
     
     response = persona.generate_response(prompt)
@@ -58,6 +57,6 @@ def generate_weighted_post_plan(persona, conversation_context: str, intensity_th
         plan = {
             "image_idea": "a creative themed image reflecting your unique style",
             "caption": "An engaging caption that fits your personality.",
-            "post_category": "general"
+            "post_category": "self"
         }
     return plan

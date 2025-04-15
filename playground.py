@@ -1,51 +1,121 @@
-# playground.py
-from src.utils.post_tracker import log_post_draft, update_post_status, get_all_posts
-import json
+import os
+import time
+import random
+from instagrapi import Client
+from dotenv import load_dotenv
+import logging
+import tempfile
+import requests
 
-# Example post details from your logs:
-post_details = {
-    "timestamp": "2025-03-14T11:21:39",
-    "caption": "Sometimes, grace and strength reside in the quiet moments. Who else finds power in subtlety? 😌✨ #StrengthInSoftness #GoldenHourGlow",
-    "image_idea": "A luminous portrait of a woman with warm, golden blonde hair flowing around her face, accentuated by natural sunlight...",
-    "dynamic_scene": "Create an image of a woman captured in a soft-focus portrait, bathed in warm, golden sunlight...",
-    "technical_prompt": "Ultra-realistic, high-resolution 8K photograph captured on a Nikon D850 with a 50mm f/1.8 lens. The subject is a [ ... ] Scene: Create an image of a woman captured in a soft-focus portrait, bathed in warm, golden sunlight streaming through a window to her left. ...",
-    "image_source": r"C:\Users\fahri\github\personal\ai_persona\src\utils\images\tmpn0e4md4v.png",
-    "post_category": "self",
-    "result": {
-        "pk": "3588070019821839774",
-        "code": "DHLYqwwtaWe"
-    }
-}
 
-# Step 1: Log the draft post (before final approval)
-draft_data = {
-    "timestamp": post_details["timestamp"],
-    "caption": post_details["caption"],
-    "image_idea": post_details["image_idea"],
-    "dynamic_scene": post_details["dynamic_scene"],
-    "technical_prompt": post_details["technical_prompt"],
-    "image_source": "",  # Not set in the draft
-    "post_category": post_details["post_category"],
-    "insta_post_id": "",  # Not set in the draft
-    "insta_code": ""      # Not set in the draft
-}
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-draft_id = log_post_draft(draft_data)
-print(f"Draft post logged with ID: {draft_id}")
+# Load environment variables
+load_dotenv()
 
-# Step 2: Simulate final posting by updating the draft with Instagram details.
-updated_data = {
-    "insta_post_id": post_details["result"]["pk"],
-    "insta_code": post_details["result"]["code"],
-    "image_source": post_details["image_source"],
-    "caption": post_details["caption"]
-}
+class InstagramTester:
+    def __init__(self):
+        self.client = Client()
+        self._setup_device()
+        self.username = os.getenv("INSTAGRAM_USERNAME")
+        self.password = os.getenv("INSTAGRAM_PASSWORD")
+        self.session_file = "instagram_session.json"
+        
+    def _setup_device(self):
+        """Mimic a real Android device"""
+        self.client.set_user_agent("Instagram 289.0.0.30.120 Android (25/7.1.2; 380dpi; 1080x1920; unknown/Android; realme RMX1993; RMX1993; qcom; en_US; 367216753)")
+        self.client.set_device({
+            "manufacturer": "realme",
+            "model": "RMX1993",
+            "android_version": 25,
+            "android_release": "7.1.2"
+        })
+        
+    def _human_delay(self, min_sec=1, max_sec=3):
+        """Random wait between actions"""
+        time.sleep(random.uniform(min_sec, max_sec))
+        
+    def login(self):
+        """Smart login with session reuse"""
+        try:
+            if os.path.exists(self.session_file):
+                self.client.load_settings(self.session_file)
+                if self.client.user_id:
+                    logger.info("Reused existing session")
+                    return True
+                    
+            self._human_delay()
+            login_result = self.client.login(self.username, self.password)
+            
+            if not login_result:
+                logger.error("Login failed")
+                return False
+                
+            self.client.dump_settings(self.session_file)
+            logger.info("New login successful")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Login error: {str(e)}")
+            return False
+            
+    def post_content(self, image_url: str, caption: str):
+        """Safe post with human-like patterns"""
+        try:
+            # Download image
+            img_path = self._download_image(image_url)
+            
+            # Add emoji variation
+            caption = self._enhance_caption(caption)
+            
+            # Simulate human editing time
+            self._human_delay(2, 5)
+            
+            # Upload post
+            self.client.photo_upload(
+                path=img_path,
+                caption=caption,
+                extra_data={"disable_comments": False}
+            )
+            
+            # Random post-activity
+            if random.random() > 0.7:
+                self.client.user_stories(random.randint(1, 3))
+                
+            return True
+            
+        except Exception as e:
+            logger.error(f"Post failed: {str(e)}")
+            return False
+            
+    def _download_image(self, url: str) -> str:
+        """Save image to temp file"""
+        response = requests.get(url)
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+        temp_file.write(response.content)
+        temp_file.close()
+        return temp_file.name
+        
+    def _enhance_caption(self, caption: str) -> str:
+        """Add random emoji variations"""
+        emojis = ["🔥", "🌟", "💪", "✨", "🚀"]
+        return f"{random.choice(emojis)} {caption} {random.choice(emojis)}"
 
-update_post_status(draft_id, updated_data)
-print(f"Draft with ID {draft_id} updated as posted.")
-
-# Step 3: Retrieve and display all posts from the database.
-posts = get_all_posts()
-print("Final posts logged:")
-for post in posts:
-    print(post)
+if __name__ == "__main__":
+    # Example usage
+    tester = InstagramTester()
+    
+    if tester.login():
+        test_post = tester.post_content(
+            image_url="https://picsum.photos/1080/1080",  # Random test image
+            caption="Test post from automated system 🤖"
+        )
+        
+        if test_post:
+            logger.info("Posted successfully! Check your Instagram account.")
+        else:
+            logger.error("Posting failed")
+    else:
+        logger.error("Cannot proceed without login")

@@ -1,9 +1,10 @@
 # src/models/character.py
 
 class CharacterProfile:
-    def __init__(self, name, appearance, personality_traits, interests, background_story, communication_style, values, user_preferences=None):
+    def __init__(self, name, appearance, appearance_nsfw, personality_traits, interests, background_story, communication_style, values, user_preferences=None):
         self.name = name
         self.appearance = appearance  
+        self.appearance_nsfw = appearance_nsfw
         self.personality_traits = personality_traits
         self.interests = interests
         self.background_story = background_story
@@ -16,6 +17,7 @@ class CharacterProfile:
         return {
             "name": self.name,
             "appearance": self.appearance,
+            "appearance_nsfw": self.appearance_nsfw,
             "personality_traits": self.personality_traits,
             "interests": self.interests,
             "background_story": self.background_story,

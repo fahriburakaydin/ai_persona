@@ -42,6 +42,7 @@ class LiaLama:
         return CharacterProfile(
             profile_data["name"],
             profile_data.get("appearance", ""),
+            profile_data.get("appearance_nsfw", ""),
             profile_data.get("personality_traits", []),
             profile_data.get("interests", []),
             profile_data.get("background_story", ""),
@@ -146,8 +147,8 @@ class LiaLama:
 
             clarification_response = openai.chat.completions.create(
                 model="gpt-4-turbo",
-                messages=[{"role": "system", "content": clarification_prompt}]
-            )
+                messages=[{"role": "system", "content": clarification_prompt}],
+                            tempreture=0.8,            )
 
             self._log_token_usage("clarification_check", clarification_response)  # Log token usage
 
@@ -174,7 +175,8 @@ class LiaLama:
         response = openai.chat.completions.create(
             model="gpt-4-turbo",
             messages=[{"role": "system", "content": personality_adaptation_prompt}],
-            max_tokens=300
+            max_tokens=300,
+            temperature=0.8
         )
 
         self._log_token_usage("generate_response", response)  # Log token usage
