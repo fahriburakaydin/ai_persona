@@ -25,7 +25,7 @@ This project is a **template for creating AI personas** that come to life throug
     - **Intent Detection:** Zero-shot classifier routes input to chat, post, or feedback handlers.
     - **Response Generation:** Combines LLM output with memory context and trait weights to craft replies.
 
-   <img src="https://github.com/user-attachments/assets/91bce563-1c21-4560-aa86-b50f9309d08c" width="48">
+   <img src="https://github.com/user-attachments/assets/91bce563-1c21-4560-aa86-b50f9309d08c" width="500">
 
     
 4. **Autonomous Posting**
@@ -35,7 +35,7 @@ This project is a **template for creating AI personas** that come to life throug
     - **Image Generation:** `generate_image()` calls Hugging Face with retry/backoff, saves PNGs in `/images`, and returns the path.
     - **Draft & Approval:** Drafts are logged; after manual approval, `InstagramIntegration` publishes the post with retry logic and logs the result.
 
-   <img src="https://github.com/user-attachments/assets/fd35a82e-9541-4273-8b60-e4a8f975086d" width="48">
+   <img src="https://github.com/user-attachments/assets/fd35a82e-9541-4273-8b60-e4a8f975086d" width="500">
 
     
 5. **Feedback & Learning**
