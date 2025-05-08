@@ -25,20 +25,20 @@ This project is a **template for creating AI personas** that come to life throug
     - **Intent Detection:** Zero-shot classifier routes input to chat, post, or feedback handlers.
     - **Response Generation:** Combines LLM output with memory context and trait weights to craft replies.
 
-    ![image](https://github.com/user-attachments/assets/91bce563-1c21-4560-aa86-b50f9309d08c)
+   <img src="https://github.com/user-attachments/assets/91bce563-1c21-4560-aa86-b50f9309d08c" width="48">
 
     
-3. **Autonomous Posting**
+4. **Autonomous Posting**
     - **Chain of AI Agents:** A series of specialized modules (post planner, prompt engineer, image generator, Instagram bot) collaborate to fully automate content creation.
     - **Post Planning:** Every 6+ hours, `LiaManager` invokes `generate_weighted_post_plan()`.
     - **Prompt Engineering:** `generate_technical_prompt()` refines the idea into a detailed scene description.
     - **Image Generation:** `generate_image()` calls Hugging Face with retry/backoff, saves PNGs in `/images`, and returns the path.
     - **Draft & Approval:** Drafts are logged; after manual approval, `InstagramIntegration` publishes the post with retry logic and logs the result.
-    
-      ![image](https://github.com/user-attachments/assets/fd35a82e-9541-4273-8b60-e4a8f975086d)
+
+   <img src="https://github.com/user-attachments/assets/fd35a82e-9541-4273-8b60-e4a8f975086d" width="48">
 
     
-4. **Feedback & Learning**
+5. **Feedback & Learning**
     - **Explicit Feedback:** `/feedback …` commands immediately tweak personality weights.
     - **Implicit Feedback:** Semantic analysis of user messages updates trait weights over time.
     - All feedback and memories are stored in ChromaDB for semantic retrieval and future corrections.
